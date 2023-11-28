@@ -9,6 +9,7 @@
 #include <Arduino.h>
 #include <FlexCAN_T4.h>
 #include <SPI.h>
+#include <unordered_map>
 
 #define USE_CAN_PRIMARY
 // #define USE_CAN_DATA  
@@ -25,7 +26,15 @@
 #endif
 
 
-
+/*
+ _ _______ _     _ _______ ______ _______ _______ ______  
+| (_______|_)   (_|_______|_____ (_______|_______|_____ \ 
+| |_     _ _     _ _____   _____) )  _    _____   _____) )
+| | |   | | |   | |  ___) |  __  /  | |  |  ___) |  __  / 
+| | |   | |\ \ / /| |_____| |  \ \  | |  | |_____| |  \ \ 
+|_|_|   |_| \___/ |_______)_|   |_| |_|  |_______)_|   |_|
+                                                          
+*/
 
 struct Inverter {
     byte data[5][8]={{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  
@@ -35,7 +44,7 @@ struct Inverter {
                     {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}; 
     
     /*
-    example data packets:
+    example data packets from CAN bus:
     ---id ------------ byte ---------------
            | 0              | 1             | 2             | 3             | 4             | 5             | 6             | 7         |
     ----------------------------------------------------------------------------------------------------------------------------------
@@ -134,23 +143,86 @@ struct Inverter {
     unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
 };
 
-struct VDM {    
+
+/*
+ _______ _______ _     _ 
+(_______|_______|_)   (_)
+ _____   _       _     _ 
+|  ___) | |     | |   | |
+| |_____| |_____| |___| |
+|_______)\______)\_____/ 
+                         
+*/
+struct VDM{    
+    byte data[17][8] = {0x00};
+    byte dataOut[8] = {0x00};
+    unsigned long ID = 0;
+    FlexCAN_T4<CAN_PRIMARY_BUS, RX_SIZE_256, TX_SIZE_16> Can1;
+    CAN_message_t msg;
+    unsigned long receiveTime = 0;
+
+    std::unordered_map<int, int> can_id_hashmap = {
+        {0x64, 0},
+        {0x65, 1},
+        {0x66, 2},
+        {0xCA, 3},
+        {0xFA, 4},
+        {0x116, 5},
+        {0x216, 6},
+        {0x316, 7},
+        {0x416, 8},
+        {0x516, 9},
+        {0x616, 10},
+        {0x716, 11},
+        {0x816, 12},
+        {0x916, 13},
+        {0xA16, 14},
+        {0xB16, 15},
+        {0xC16, 16}
+    };
+
+    VDM(unsigned long id, FlexCAN_T4<CAN_PRIMARY_BUS, RX_SIZE_256, TX_SIZE_16> &can) : ID(id){
+        can = Can1;
+    }
+
+    void receive(unsigned long id, byte buf[]){
+            if(can_id_hashmap.find(id) != can_id_hashmap.end()){
+                int row = can_id_hashmap[id];
+                receiveTime = millis();
+                for(int i = 0; i < 8; i++) data[row][i] = buf[i];
+                return;
+            }
+            else{
+                Serial.print(id, HEX);
+                Serial.println(" is not data from VDM");
+            }
+    }
+    
+    unsigned long getID() {return ID;}
+    unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
+
+    byte pedalPingRequest() {return data[can_id_hashmap[0xCA]][0];}
+    byte getVCUSTATE() {return data[can_id_hashmap[0xFA]][0];}
+
+
+
+
+    //IDK what the other recieving stuff is but its ther in the spreadsheet if needed to be implemented later
+
 
 };
 
 
-struct BCM {
 
-};
-
-struct Dash {
-
-};
-
-struct Energy_Meter {
-
-};
-
+/*
+_  _  _ _     _ _______ _______ _        ______ 
+(_)(_)(_|_)   (_|_______|_______|_)      / _____)
+ _  _  _ _______ _____   _____   _      ( (____  
+| || || |  ___  |  ___) |  ___) | |      \____ \ 
+| || || | |   | | |_____| |_____| |_____ _____) )
+ \_____/|_|   |_|_______)_______)_______|______/ 
+                                                 
+*/
 
 // Wheel type
 // INITIALIZE WHEEL WITH WHEELTYPE AND I HANDLE THE LOCATION WITHIN THE CONSTRUCTOR
@@ -260,14 +332,61 @@ struct Central_IMU {
 
 };
 
+
+/*
+_______ ______   ______ 
+(_______|_____ \ / _____)
+ _   ___ _____) | (____  
+| | (_  |  ____/ \____ \ 
+| |___) | |      _____) )
+ \_____/|_|     (______/ 
+                         
+*/
 struct GPS {
     byte data[4][8] = {{0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  //Latitude
                 {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, //Longitude
                 {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, //Other
                 {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}; //Other 2
-    
+    unsigned long ID = 0;
+    FlexCAN_T4<CAN_DATA_BUS, RX_SIZE_256, TX_SIZE_16> Can2;
+    CAN_message_t msg;
+    unsigned long receiveTime = 0;
+
+    GPS(unsigned long id, FlexCAN_T4<CAN_DATA_BUS, RX_SIZE_256, TX_SIZE_16> &can) : ID(id){
+        can = Can2;
+    }
+
+    void receive(unsigned long id, byte buf[]){
+        if(id >= 0x10F23 && id <= 0x10F6){
+            byte digit2 = (id - 0x10F20); // 0 for 0x10F20, 1 for 0x10F21, 2 for 0x10F22, 3 for 0x10F23
+            receiveTime = millis();
+            for(int i = 0; i < 8; i++) data[digit2][i] = buf[i];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+            return;
+        }
+        else{
+            Serial.print(id, HEX);
+            Serial.println(" is not data from GPS");
+        }
+    }
+
+    float getLatitude() {return ((long)data[0][0] << 24) + ((long)data[0][1] << 16) + ((long)data[0][2] << 8) + data[0][3];}
+    float getHighPrecisionLatitude() {return ((long)data[0][4] << 24) + ((long)data[0][5] << 16) + ((long)data[0][6] << 8) + data[0][7];}
+    float getLongitude() {return ((long)data[1][0] << 24) + ((long)data[1][1] << 16) + ((long)data[1][2] << 8) + data[1][3];}
+    float getHighPrecisionLongitude() {return ((long)data[1][4] << 24) + ((long)data[1][5] << 16) + ((long)data[1][6] << 8) + data[1][7];}
+    unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
+
+    //rest of the data is still undecided.
+
 };
 
+/*
+ ______ _______ ______  _______ _        ______ 
+(_____ (_______|______)(_______|_)      / _____)
+ _____) )____   _     _ _______ _      ( (____  
+|  ____/  ___) | |   | |  ___  | |      \____ \ 
+| |    | |_____| |__/ /| |   | | |_____ _____) )
+|_|    |_______)_____/ |_|   |_|_______|______/ 
+*/
 struct Pedals{
     byte data[2][8] = {{0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  
                 {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}; 
@@ -293,12 +412,40 @@ struct Pedals{
         }
     }
 
+    unsigned long getID() {return ID;}
+
+    float getAPPS1() {return ((long)data[0][0] << 8) + data[0][1];}
+    float getAPPS2() {return ((long)data[0][2] << 8) + data[0][3];}
+    float getBrakePressureF() {return ((long)data[0][4] << 8) + data[0][5];}
+    float getBrakePressureR() {return ((long)data[0][6] << 8) + data[0][7];}
+    byte getPedalsPingResponse() {return data[1][0];}
+    void pedalPingRequest(byte anything) {dataOut[0] = anything; send();} //ping request
     
+    void send(){
+        for(int i = 0; i < 8; i++) msg.buf[i] = dataOut[i];
+        msg.id = ID;
+        msg.flags.extended=true;
+        Can1.write(msg);
+    }
+    void reset(){
+        for(int i = 0; i < 8; i++) dataOut[i] = 0x00;
+        send();
+    }
+
+    unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
 
 };
 
 
+/*
+ _______ _______ _     _ 
+(_______|_______|_)   (_)
+ _______ _       _     _ 
+|  ___  | |     | |   | |
+| |   | | |_____| |___| |
+|_|   |_|\______)\_____/ 
 
+*/
 
 
 struct ACU {
@@ -390,5 +537,141 @@ struct ACU {
         send();
     }
 
+    unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
+
+};
+
+
+/*
+ ______  _______ _______ 
+(____  \(_______|_______)
+ ____)  )_       _  _  _ 
+|  __  (| |     | ||_|| |
+| |__)  ) |_____| |   | |
+|______/ \______)_|   |_|
+
+*/
+struct BCM {
+    byte data[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    byte dataOut[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+    unsigned long ID = 0;
+    FlexCAN_T4<CAN_DATA_BUS, RX_SIZE_256, TX_SIZE_16> Can2;
+    CAN_message_t msg;
+    unsigned long receiveTime = 0;
+
+    void receive(unsigned long id, byte buf[]){
+        if(id == 0x12000){
+            receiveTime = millis();
+            for(int i = 0; i < 8; i++) data[i] = buf[i];
+            return;
+        }
+        else{
+            Serial.print(id, HEX);
+            Serial.println(" is not data from BCM");
+        }
+    }
+
+    byte getCloudStatus() {return data[0];}
+    unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
+
+};
+
+/*
+ ______  _______  ______ _     _ 
+(______)(_______)/ _____|_)   (_)
+ _     _ _______( (____  _______ 
+| |   | |  ___  |\____ \|  ___  |
+| |__/ /| |   | |_____) ) |   | |
+|_____/ |_|   |_(______/|_|   |_|
+                                 
+*/
+struct Dash {
+    byte data[3][8] = {0x00};
+    byte dataOut[8] = {0x00};
+    unsigned long ID = 0;
+    FlexCAN_T4<CAN_DATA_BUS, RX_SIZE_256, TX_SIZE_16> Can2;
+    CAN_message_t msg;
+    unsigned long receiveTime = 0;
+
+    Dash(unsigned long id, FlexCAN_T4<CAN_DATA_BUS, RX_SIZE_256, TX_SIZE_16> &can) : ID(id){
+        can = Can2;
+    }
+
+    void receive(unsigned long id, byte buf[]){
+        if(id >= 0x11001 && id <= 0x11002){
+            byte digit2 = (id - 0x11001); // 0 for 0x11001, 1 for 0x11002
+            receiveTime = millis();
+            for(int i = 0; i < 8; i++) data[digit2][i] = buf[i];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+            return;
+        }
+        else{
+            Serial.print(id, HEX);
+            Serial.println(" is not data from Dash");
+        }
+    }
+
+    float getAccelX() {return ((long)data[0][0] << 8) + data[0][1];}
+    float getAccelY() {return ((long)data[0][2] << 8) + data[0][3];}
+    float getAccelZ() {return ((long)data[0][4] << 8) + data[0][5];}
+    float getGyroX() {return ((long)data[1][0] << 8) + data[1][1];}
+    float getGyroY() {return ((long)data[1][2] << 8) + data[1][3];}
+    float getGyroZ() {return ((long)data[1][4] << 8) + data[1][5];}
+
+    unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
+
+    void send(){
+        for(int i = 0; i < 8; i++) msg.buf[i] = dataOut[i];
+        msg.id = ID;
+        msg.flags.extended=true;
+        Can2.write(msg);
+    }
+    void reset(){
+        for(int i = 0; i < 8; i++) dataOut[i] = 0x00;
+        send();
+    }
+
+
+
+
+};
+
+/*
+ _______     _______ _______ _______ _______ ______  
+(_______)   (_______|_______|_______|_______|_____ \ 
+ _____ _____ _  _  _ _____      _    _____   _____) )
+|  ___|_____) ||_|| |  ___)    | |  |  ___) |  __  / 
+| |_____    | |   | | |_____   | |  | |_____| |  \ \ 
+|_______)   |_|   |_|_______)  |_|  |_______)_|   |_|
+                                                     
+*/
+
+struct Energy_Meter {
+    byte data[8] = {0x00};
+    unsigned long ID = 0;
+    FlexCAN_T4<CAN_PRIMARY_BUS, RX_SIZE_256, TX_SIZE_16> Can1;
+    CAN_message_t msg;
+    unsigned long receiveTime = 0;
+
+    Energy_Meter(unsigned long id, FlexCAN_T4<CAN_PRIMARY_BUS, RX_SIZE_256, TX_SIZE_16> &can) : ID(id){
+        can = Can1;
+    }
+
+    void receive(unsigned long id, byte buf[]){
+        if(id == 100){
+            receiveTime = millis();
+            for(int i = 0; i < 8; i++) data[i] = buf[i];
+            return;
+        }
+        else{
+            Serial.print(id, HEX);
+            Serial.println(" is not data from Energy Meter");
+        }
+    }
+
+    float getCurrent() {return ((long)data[0] << 24) + ((long)data[1] << 16) + ((long)data[2] << 8) + data[3];}
+    float getVoltage() {return ((long)data[4] << 24) + ((long)data[5] << 16) + ((long)data[6] << 8) + data[7];}
+    unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
+    
 };
 
