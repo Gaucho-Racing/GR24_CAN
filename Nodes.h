@@ -9,7 +9,8 @@
 #include <Arduino.h>
 #include <FlexCAN_T4.h>
 #include <SPI.h>
-#include <unordered_map>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define USE_CAN_PRIMARY
 // #define USE_CAN_DATA  
@@ -161,33 +162,54 @@ struct VDM{
     CAN_message_t msg;
     unsigned long receiveTime = 0;
 
-    std::unordered_map<int, int> can_id_hashmap = {
-        {0x64, 0},
-        {0x65, 1},
-        {0x66, 2},
-        {0xCA, 3},
-        {0xFA, 4},
-        {0x116, 5},
-        {0x216, 6},
-        {0x316, 7},
-        {0x416, 8},
-        {0x516, 9},
-        {0x616, 10},
-        {0x716, 11},
-        {0x816, 12},
-        {0x916, 13},
-        {0xA16, 14},
-        {0xB16, 15},
-        {0xC16, 16}
-    };
+    int getCANHash(int id){
+        switch(id){
+            case 0x64:
+                return 0;
+            case 0x65:
+                return 1;
+            case 0x66:
+                return 2;
+            case 0xCA:
+                return 3;
+            case 0xFA:
+                return 4;
+            case 0x116:
+                return 5;
+            case 0x216:
+                return 6;
+            case 0x316:
+                return 7;
+            case 0x416:
+                return 8;
+            case 0x516:
+                return 9;
+            case 0x616:
+                return 10;
+            case 0x716:
+                return 11;
+            case 0x816:
+                return 12;
+            case 0x916:
+                return 13;
+            case 0xA16:
+                return 14;
+            case 0xB16:
+                return 15;
+            case 0xC16:
+                return 16;
+            default:
+                return -1;
+        };
+    }
 
     VDM(unsigned long id, FlexCAN_T4<CAN_PRIMARY_BUS, RX_SIZE_256, TX_SIZE_16> &can) : ID(id){
         can = Can1;
     }
 
     void receive(unsigned long id, byte buf[]){
-            if(can_id_hashmap.find(id) != can_id_hashmap.end()){
-                int row = can_id_hashmap[id];
+            if(getCANHash(id) != -1){
+                int row = getCANHash(id);
                 receiveTime = millis();
                 for(int i = 0; i < 8; i++) data[row][i] = buf[i];
                 return;
@@ -201,8 +223,8 @@ struct VDM{
     unsigned long getID() {return ID;}
     unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
 
-    byte pedalPingRequest() {return data[can_id_hashmap[0xCA]][0];}
-    byte getVCUSTATE() {return data[can_id_hashmap[0xFA]][0];}
+    byte pedalPingRequest() {return data[3][0];}
+    byte getVCU_STATE() {return data[4][0];}
 
 
 
@@ -674,4 +696,8 @@ struct Energy_Meter {
     unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
     
 };
+
+
+
+
 
