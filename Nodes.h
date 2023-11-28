@@ -18,7 +18,6 @@
 
 
 
-
 struct Inverter {
     byte data[5][8]={{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  
                     {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, 
@@ -27,6 +26,7 @@ struct Inverter {
                     {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}; 
     
     /*
+    example data packets:
     ---id ------------ byte ---------------
            | 0              | 1             | 2             | 3             | 4             | 5             | 6             | 7         |
     ----------------------------------------------------------------------------------------------------------------------------------
@@ -111,8 +111,6 @@ struct Inverter {
     bool getRPMMaxLimit() {return ((data[4][5] & 0x40) == 0x40);}//        ^
     bool getPowerLimit() {return ((data[4][5] & 0x20) == 0x20);}//    
 
-
-
     void setCurrent(float in) {send(0x1A, (long)(in*10), 2);}//            ^
     void setBrakeCurrent(float in) {send(0x1B, (long)(in*10), 2);}//       ^
     void setERPM(long in) {send(0x1C, (long)in, 4);}//                     ^
@@ -137,6 +135,8 @@ struct BCM {
 };
 
 struct ACU {
+    // have a separate hpp file to store data in vectorized format
+    // 140 condensed data packets
 
 };
 
@@ -144,75 +144,104 @@ struct Dash {
 
 };
 
-
-struct Sensors {
-    // REFERENCE GR24 CAN BUS DATA SHEET
-   
-    unsigned long ID = 0;
-    FlexCAN_T4<CAN_DATA_BUS, RX_SIZE_256, TX_SIZE_16> Can1;
-    CAN_message_t msg;
-    unsigned long receiveTime = 0;
-
-    Sensors(unsigned long id, FlexCAN_T4<CAN_DATA_BUS, RX_SIZE_256, TX_SIZE_16> &can) : ID(id){
-        can = Can1;
-    }
-
-    void receive(unsigned long id, byte buf[]){
-        // idfk 
-        // ... polymorphism using c++ or some shit
-        // or just not
-    }
-
-     struct Wheel_FR {
-         byte data[5][8] = {{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, 
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}; 
-    };
-    struct Wheel_FL {
-        byte data[5][8] = {{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, 
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}; 
-    };
-    
-    struct Wheel_RR {
-        byte data[5][8] = {{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, 
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}; 
-    };
-
-    struct Wheel_RL {
-        byte data[5][8] = {{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, 
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}; 
-    };
-    
-    struct Central_IMU {
-        byte data[3][8] = {{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  //Accel
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, //Gyro
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}; //Mag
-
-    };
-
-    struct GPS {
-        byte data[4][8] = {{0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  //Latitude
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, //Longitude
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, //Other
-                    {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}; //Other 2
-    };
-
-};
-
 struct Energy_Meter {
 
 };
+
+
+// Wheel type
+// INITIALIZE WHEEL WITH WHEELTYPE AND I HANDLE THE IDS WITHIN THE CONSTRUCTOR
+enum HubSensorArray{
+    WHEEL_FR, //ids 0x10F00 - 0x10F04
+    WHEEL_FL, //ids 0x10F08 - 0x10F0C
+    WHEEL_RR, //ids 0x10F10 - 0x10F14
+    WHEEL_RL  //ids 0x10F18 - 0x10F1C
+};
+
+struct Wheel {
+    byte data[5][8] = {{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  
+                {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, 
+                {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  
+                {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  
+                {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}; 
+    HubSensorArray location;
+
+    unsigned long ID = 0;
+    FlexCAN_T4<CAN_DATA_BUS, RX_SIZE_256, TX_SIZE_16> Can2;
+    CAN_message_t msg;
+    unsigned long receiveTime = 0;
+    int id_range[2];
+    char* loc_cstr;
+    Wheel(unsigned long id, FlexCAN_T4<CAN_DATA_BUS, RX_SIZE_256, TX_SIZE_16> &can, HubSensorArray loc) : ID(id), location(loc){
+        can = Can2; //set reference
+        switch(location){
+            case WHEEL_FR:
+                id_range[0] = 0x10F00;
+                id_range[1] = 0x10F04;
+                loc_cstr = "FR WHEEL HUB";
+                break;
+            case WHEEL_FL:
+                id_range[0] = 0x10F08;
+                id_range[1] = 0x10F0C;
+                loc_cstr = "FL WHEEL HUB";
+                break;
+            case WHEEL_RR:
+                id_range[0] = 0x10F10;
+                id_range[1] = 0x10F14;
+                loc_cstr = "RR WHEEL HUB";
+                break;
+            case WHEEL_RL:
+                id_range[0] = 0x10F18;
+                id_range[1] = 0x10F1C;
+                loc_cstr = "RL WHEEL HUB";
+                break;
+            default:
+                break;
+        }
+    }
+    
+
+    void recieve(unsigned long id, byte buf[]){
+        if(id >= id_range[0] && id <= id_range[1]){
+            // extract row dpending on id and wheel location
+            byte row = (id - id_range[0]);
+            receiveTime = millis();
+            for(int i = 0; i < 8; i++) data[row][i] = buf[i];
+            for(int i = 0; i < 8; i++){
+                data[row][i] = buf[i];
+            }
+            return;
+        }
+        else{
+            Serial.print(id, HEX);
+            Serial.print(" is not data from ");
+            Serial.println(loc_cstr);
+        }
+    }
+
+    float getSuspensionTravel() {return data[0][0];}
+    float getWheelspeed() {return data[0][1] >> 24 + (long)}
+
+
+    
+};
+
+struct Central_IMU {
+    byte data[3][8] = {{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  //Accel
+                {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, //Gyro
+                {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}; //Mag
+
+};
+
+struct GPS {
+    byte data[4][8] = {{0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  //Latitude
+                {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, //Longitude
+                {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, //Other
+                {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}; //Other 2
+    
+};
+
+
 
 
 
