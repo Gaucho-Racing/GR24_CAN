@@ -150,7 +150,7 @@ struct Energy_Meter {
 
 
 // Wheel type
-// INITIALIZE WHEEL WITH WHEELTYPE AND I HANDLE THE IDS WITHIN THE CONSTRUCTOR
+// INITIALIZE WHEEL WITH WHEELTYPE AND I HANDLE THE LOCATION WITHIN THE CONSTRUCTOR
 enum HubSensorArray{
     WHEEL_FR, //ids 0x10F00 - 0x10F04
     WHEEL_FL, //ids 0x10F08 - 0x10F0C
@@ -220,9 +220,33 @@ struct Wheel {
     }
 
     float getSuspensionTravel() {return data[0][0];}
-    float getWheelspeed() {return data[0][1] >> 24 + (long)}
-
-
+    float getWheelSpeed() {return((long)data[0][1] << 8) + data[0][2];}
+    float getTirePressure() {return data[0][3];}
+    float getIMUAccelX() {return ((long)data[1][0] << 8) + data[1][1];}
+    float getIMUAccelY() {return ((long)data[1][2] << 8) + data[1][3];}
+    float getIMUAccelZ() {return ((long)data[1][4] << 8) + data[1][5];}
+    float getIMUGyroX() {return ((long)data[2][0] << 8) + data[2][1];}
+    float getIMUGyroY() {return ((long)data[2][2] << 8) + data[2][3];}
+    float getIMUGyroZ() {return ((long)data[2][4] << 8) + data[2][5];}
+    float getBraketemp1() {return data[3][0];}
+    float getBraketemp2() {return data[3][1];}
+    float getBraketemp3() {return data[3][2];}
+    float getBraketemp4() {return data[3][3];}
+    float getBraketemp5() {return data[3][4];}
+    float getBraketemp6() {return data[3][5];}
+    float getBraketemp7() {return data[3][6];}
+    float getBraketemp8() {return data[3][7];}
+    float getTireTemp1() {return data[4][0];}
+    float getTireTemp2() {return data[4][1];}
+    float getTireTemp3() {return data[4][2];}
+    float getTireTemp4() {return data[4][3];}
+    float getTireTemp5() {return data[4][4];}
+    float getTireTemp6() {return data[4][5];}
+    float getTireTemp7() {return data[4][6];}
+    float getTireTemp8() {return data[4][7];}
+    float getAvgBrakeTemp() {return (getBraketemp1() + getBraketemp2() + getBraketemp3() + getBraketemp4() + getBraketemp5() + getBraketemp6() + getBraketemp7() + getBraketemp8())/8;}
+    float getAvgTireTemp() {return (getTireTemp1() + getTireTemp2() + getTireTemp3() + getTireTemp4() + getTireTemp5() + getTireTemp6() + getTireTemp7() + getTireTemp8())/8;}
+    unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
     
 };
 
