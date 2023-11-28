@@ -1,9 +1,18 @@
+// Nikunj Parasar 
+// Created: 10/20/2023
+// GAUCHO RACING CAN NODES SOFTWARE (FLEXCAN_T4)
+// This file contains the CAN nodes for the GR24 EV
+
+// //////////////////////////////////////////////////////////////////////ADJUST UNITS LATER AS NEEDED
+// https://docs.google.com/spreadsheets/d/1XfJhhAQoDnuSuwluNitPsDWtuQu-bP-VbEGPmSo5ujA/edit#gid=1132363474
+
 #include <Arduino.h>
 #include <FlexCAN_T4.h>
 #include <SPI.h>
 
 #define USE_CAN_PRIMARY
 // #define USE_CAN_DATA  
+
 
 #if defined(USE_CAN_PRIMARY) && !defined(USE_CAN_DATA)
     #define CAN_PRIMARY_BUS CAN1
@@ -125,18 +134,12 @@ struct Inverter {
     unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
 };
 
-struct VDM {
+struct VDM {    
 
 };
 
 
 struct BCM {
-
-};
-
-struct ACU {
-    // have a separate hpp file to store data in vectorized format
-    // 140 condensed data packets
 
 };
 
@@ -207,9 +210,6 @@ struct Wheel {
             byte row = (id - id_range[0]);
             receiveTime = millis();
             for(int i = 0; i < 8; i++) data[row][i] = buf[i];
-            for(int i = 0; i < 8; i++){
-                data[row][i] = buf[i];
-            }
             return;
         }
         else{
@@ -218,6 +218,9 @@ struct Wheel {
             Serial.println(loc_cstr);
         }
     }
+    
+    unsigned long getID() {return ID;}
+
 
     float getSuspensionTravel() {return data[0][0];}
     float getWheelSpeed() {return((long)data[0][1] << 8) + data[0][2];}
@@ -228,22 +231,22 @@ struct Wheel {
     float getIMUGyroX() {return ((long)data[2][0] << 8) + data[2][1];}
     float getIMUGyroY() {return ((long)data[2][2] << 8) + data[2][3];}
     float getIMUGyroZ() {return ((long)data[2][4] << 8) + data[2][5];}
-    float getBraketemp1() {return data[3][0];}
-    float getBraketemp2() {return data[3][1];}
-    float getBraketemp3() {return data[3][2];}
-    float getBraketemp4() {return data[3][3];}
-    float getBraketemp5() {return data[3][4];}
-    float getBraketemp6() {return data[3][5];}
-    float getBraketemp7() {return data[3][6];}
-    float getBraketemp8() {return data[3][7];}
-    float getTireTemp1() {return data[4][0];}
-    float getTireTemp2() {return data[4][1];}
-    float getTireTemp3() {return data[4][2];}
-    float getTireTemp4() {return data[4][3];}
-    float getTireTemp5() {return data[4][4];}
-    float getTireTemp6() {return data[4][5];}
-    float getTireTemp7() {return data[4][6];}
-    float getTireTemp8() {return data[4][7];}
+    byte getBraketemp1() {return data[3][0];}
+    byte getBraketemp2() {return data[3][1];}
+    byte getBraketemp3() {return data[3][2];}
+    byte getBraketemp4() {return data[3][3];}
+    byte getBraketemp5() {return data[3][4];}
+    byte getBraketemp6() {return data[3][5];}
+    byte getBraketemp7() {return data[3][6];}
+    byte getBraketemp8() {return data[3][7];}
+    byte getTireTemp1() {return data[4][0];}
+    byte getTireTemp2() {return data[4][1];}
+    byte getTireTemp3() {return data[4][2];}
+    byte getTireTemp4() {return data[4][3];}
+    byte getTireTemp5() {return data[4][4];}
+    byte getTireTemp6() {return data[4][5];}
+    byte getTireTemp7() {return data[4][6];}
+    byte getTireTemp8() {return data[4][7];}
     float getAvgBrakeTemp() {return (getBraketemp1() + getBraketemp2() + getBraketemp3() + getBraketemp4() + getBraketemp5() + getBraketemp6() + getBraketemp7() + getBraketemp8())/8;}
     float getAvgTireTemp() {return (getTireTemp1() + getTireTemp2() + getTireTemp3() + getTireTemp4() + getTireTemp5() + getTireTemp6() + getTireTemp7() + getTireTemp8())/8;}
     unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
@@ -265,9 +268,127 @@ struct GPS {
     
 };
 
+struct Pedals{
+    byte data[2][8] = {{0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  
+                {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}; 
+    byte dataOut[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    unsigned long ID = 0;
+    FlexCAN_T4<CAN_PRIMARY_BUS, RX_SIZE_256, TX_SIZE_16> Can1;
+    CAN_message_t msg;
+    unsigned long receiveTime = 0;
+
+    Pedals(unsigned long id, FlexCAN_T4<CAN_PRIMARY_BUS, RX_SIZE_256, TX_SIZE_16> &can) : ID(id){
+        can = Can1;
+    }
+
+    void receive(unsigned long id, byte buf[]){
+        if(id == 0xC8 || id == 0xC9){
+            receiveTime = millis();
+            for(int i = 0; i < 8; i++) data[0][i] = buf[i];
+            return;
+        }
+        else{
+            Serial.print(id, HEX);
+            Serial.println(" is not data from Pedals");
+        }
+    }
+
+    
+
+};
 
 
 
 
 
+struct ACU {
+    //condensed cell data and bunch of other stuff
+    byte data[40][8] = {0x00}; //40 ids
+    byte dataOut[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    unsigned long ID = 0;
+    FlexCAN_T4<CAN_PRIMARY_BUS, RX_SIZE_256, TX_SIZE_16> Can1;
+    CAN_message_t msg;
+    unsigned long receiveTime = 0;
+    int range_cell_data[2] = {0x99, 0xBC};
+    
+    ACU(unsigned long id, FlexCAN_T4<CAN_PRIMARY_BUS, RX_SIZE_256, TX_SIZE_16> &can): ID(id){
+        can = Can1;
+    }
+
+    void receive(unsigned long id, byte buf[]){
+        if(id >= 0x96 && id <= 0xBC){
+            int row = id - 0x96;
+            receiveTime = millis();
+            for(int i = 0; i < 8; i++) data[row][i] = buf[i];
+        }
+        else if(id == 0xC7) {
+            receiveTime = millis();
+            for(int i = 0; i < 8; i++) data[39][i] = buf[i];
+            return;
+        }
+        else{
+            Serial.print(id, HEX);
+            Serial.println(" is not data from Battery");
+        }
+    }
+
+    unsigned long getID() {return ID;}
+
+
+    //voltages and temps for specific cells (range 0 to 144)
+    float getCellVoltage_n(int cell_n){
+        if(cell_n < 0 || cell_n > 144) Serial.println("Battery Cell number out of range [0,144]");
+        int col = (cell_n%4)*2; //even bytes
+        int row = (cell_n/4) + 3; //check GR24 CAN datasheet
+        return data[row][col];
+    }
+    float getCellTemp_n(int cell_n){
+        if(cell_n < 0 || cell_n > 144) Serial.println("Battery Cell number out of range [0,144]");
+        int col = (cell_n%4)*2 + 1; //odd bytes
+        int row = (cell_n/4) + 3; //check GR24 CAN datasheet
+        return data[row][col];
+    }
+
+    //ACU General
+    float getAccumulatorVoltage(){return ((long)data[0][0] << 8) + data[0][1];}
+    float getAccumulatorCurrent(){return ((long)data[0][2] << 8) + data[0][3];}
+    float getMaxCellTemp(){return ((long)data[0][4] << 8) + data[0][5];}
+    byte getSOC(){return data[0][6];}//state of charge
+    byte getACUGeneralErrors(){return data[0][7];}
+
+    byte getFan1Speed(){return data[1][0];}
+    byte getFan2Speed(){return data[1][1];}
+    byte getFan3Speed(){return data[1][2];}
+    byte getFan4Speed(){return data[1][3];}
+    byte getPumpSpeed(){return data[1][4];}
+    float getWaterTemp(){return ((long)data[1][5] << 8) + data[1][6];}
+    byte getPowertrainCoolingErrors(){return data[1][7];}
+    byte getACUPingResponse(){return data[39][0];}
+    unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
+
+
+    void setFan1Speed(byte in) {dataOut[0] = in; send();}
+    void setFan2Speed(byte in) {dataOut[1] = in; send();}
+    void setFan3Speed(byte in) {dataOut[2] = in; send();}
+    void setFan4Speed(byte in) {dataOut[3] = in; send();}
+    void setPumpSpeed(byte in) {dataOut[4] = in; send();}
+
+    void playSound(byte soundCode) {dataOut[0] = soundCode; send();} //play sound
+    void pingRequest(byte anything) {dataOut[0] = anything; send();} //ping request
+    // void requestCellData(cell, data type, periodic?) //  IDK what this supposed to do
+    
+
+    void send(){
+        for(int i = 0; i < 8; i++) msg.buf[i] = dataOut[i];
+        msg.id = ID;
+        msg.flags.extended=true;
+        Can1.write(msg);
+    }
+
+    void reset(){
+        for(int i = 0; i < 8; i++) dataOut[i] = 0x00;
+        send();
+    }
+
+};
 
