@@ -5,6 +5,8 @@
 
 // //////////////////////////////////////////////////////////////////////ADJUST UNITS LATER AS NEEDED
 // https://docs.google.com/spreadsheets/d/1XfJhhAQoDnuSuwluNitPsDWtuQu-bP-VbEGPmSo5ujA/edit#gid=1132363474
+#ifndef NODES
+#define NODES
 
 #include <Arduino.h>
 #include <FlexCAN_T4.h>
@@ -704,7 +706,7 @@ struct Energy_Meter {
     unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
     
 };
-
+#endif
 
 
 
