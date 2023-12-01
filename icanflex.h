@@ -30,8 +30,29 @@ class iCANflex{
     public:
 
     iCANflex();
+    unsigned long lastRecieveTime;
     FlexCAN_T4<CAN_PRIMARY_BUS, RX_SIZE_256, TX_SIZE_16> can_primary;
     FlexCAN_T4<CAN_DATA_BUS, RX_SIZE_256, TX_SIZE_16> can_data;
+    CAN_message_t msg;
+
+    bool begin();
+    bool readData();
+    bool readData(INT32U*);
+    void getData();
+    bool begin();
+    bool getTrue();
+    bool getFalse();
+    void rawData(INT32U*, INT8U*);
+    void setDtiID(INT8U);
+
+
+    void send(long, long, int);
+    void send(long , byte[]);
+    void sendToInv(int, long, int);
+    void sendDashError(byte);
+
+
+    void ping(byte);
 
 
     Inverter DTI = Inverter(22, can_primary);
