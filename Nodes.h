@@ -347,6 +347,11 @@ struct Wheel {
     
 };
 
+
+
+
+
+
 struct Central_IMU {
     byte data[3][8] = {{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  //Accel
                 {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, //Gyro
@@ -581,6 +586,9 @@ struct BCM {
     FlexCAN_T4<CAN_DATA_BUS, RX_SIZE_256, TX_SIZE_16> Can2;
     CAN_message_t msg;
     unsigned long receiveTime = 0;
+    BCM(unsigned long id, FlexCAN_T4<CAN_DATA_BUS, RX_SIZE_256, TX_SIZE_16> &can) : ID(id){
+        can = Can2;
+    }
 
     void receive(unsigned long id, byte buf[]){
         if(id == 0x12000){
