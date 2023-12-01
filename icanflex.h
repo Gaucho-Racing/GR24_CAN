@@ -30,7 +30,6 @@ class iCANflex{
     public:
 
     iCANflex();
-    unsigned long lastRecieveTime;
     FlexCAN_T4<CAN_PRIMARY_BUS, RX_SIZE_256, TX_SIZE_16> can_primary;
     FlexCAN_T4<CAN_DATA_BUS, RX_SIZE_256, TX_SIZE_16> can_data;
     CAN_message_t msg;
