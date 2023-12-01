@@ -32,7 +32,7 @@ class iCANflex{
     iCANflex();
     FlexCAN_T4<CAN_PRIMARY_BUS, RX_SIZE_256, TX_SIZE_16> can_primary;
     FlexCAN_T4<CAN_DATA_BUS, RX_SIZE_256, TX_SIZE_16> can_data;
-
+    void begin();
 
     Inverter DTI = Inverter(22, can_primary);
     VDM ECU = VDM(23, can_primary);
