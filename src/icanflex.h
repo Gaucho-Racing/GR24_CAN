@@ -38,7 +38,6 @@ class iCANflex{
     bool readData();
     bool readData(INT32U*);
     void getData();
-    bool begin();
     bool getTrue();
     bool getFalse();
     void rawData(INT32U*, INT8U*);

@@ -566,7 +566,6 @@ struct ACU {
         send();
     }
 
-    unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
 
 };
 
