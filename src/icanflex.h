@@ -34,6 +34,21 @@ class iCANflex{
     FlexCAN_T4<CAN_DATA_BUS, RX_SIZE_256, TX_SIZE_16> can_data;
     CAN_message_t msg;
 
+
+   
+    Inverter DTI = Inverter(22, can_primary);
+    VDM ECU = VDM(23, can_primary);
+    Wheel WFL = Wheel(24, can_data, WHEEL_FL);
+    Wheel WFR = Wheel(25, can_data, WHEEL_FR);
+    Wheel WRL = Wheel(26, can_data, WHEEL_RL);
+    Wheel WRR = Wheel(27, can_data, WHEEL_RR);
+    GPS GPS1 = GPS(28, can_data);
+    Pedals PEDALS = Pedals(29, can_primary);
+    ACU ACU1 = ACU(30, can_primary);
+    BCM BCM1 = BCM(31, can_data);
+    Dash DASHBOARD = Dash(32, can_data);
+    Energy_Meter ENERGY_METER = Energy_Meter(33, can_primary);
+
     bool begin();
     bool readData();
     bool readData(INT32U*);
@@ -53,18 +68,7 @@ class iCANflex{
     void ping(byte);
 
 
-    Inverter DTI = Inverter(22, can_primary);
-    VDM ECU = VDM(23, can_primary);
-    Wheel WFL = Wheel(24, can_data, WHEEL_FL);
-    Wheel WFR = Wheel(25, can_data, WHEEL_FR);
-    Wheel WRL = Wheel(26, can_data, WHEEL_RL);
-    Wheel WRR = Wheel(27, can_data, WHEEL_RR);
-    GPS GPS1 = GPS(28, can_data);
-    Pedals PEDALS = Pedals(29, can_primary);
-    ACU ACU1 = ACU(30, can_primary);
-    BCM BCM1 = BCM(31, can_data);
-    Dash DASHBOARD = Dash(32, can_data);
-    Energy_Meter ENERGY_METER = Energy_Meter(33, can_primary);
+
 
 
 

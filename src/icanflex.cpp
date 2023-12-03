@@ -8,6 +8,11 @@ unsigned long stopwatch=0;
 bool canSend = false;
 
 
+iCANflex::iCANflex(){
+
+
+}
+
 bool iCANflex::begin() {   //Coordinate the magic CAN pixies to dance together 
     Serial.begin(115200);
     // hasSD=SD.begin(BUILTIN_SDCARD);
