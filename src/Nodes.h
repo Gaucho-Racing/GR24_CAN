@@ -352,12 +352,48 @@ struct Wheel {
 
 
 
-//IMU
+//IMU // IMU
 
 struct Central_IMU {
     byte data[3][8] = {{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  //Accel
                 {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, //Gyro
                 {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}}; //Mag
+
+    unsigned long ID = 0;
+    FlexCAN_T4<CAN_DATA_BUS, RX_SIZE_256, TX_SIZE_16> Can2;
+    CAN_message_t msg;
+    unsigned long receiveTime = 0;
+
+    Central_IMU(unsigned long id, FlexCAN_T4<CAN_DATA_BUS, RX_SIZE_256, TX_SIZE_16> &can) : ID(id){
+        can = Can2;
+    }
+
+    void receive(unsigned long id, byte buf[]){
+        if(id >= 0x10F20 && id <= 0x1022){
+            byte digit2 = (id - 0x10F20); 
+            receiveTime = millis();
+            for(int i = 0; i < 8; i++) data[digit2][i] = buf[i];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+            return;
+        }
+        else{
+            Serial.print(id, HEX);
+            Serial.println(" is not data from GPS");
+        }
+    }
+
+    float getAccelX() {return ((long)data[0][0] << 8) + data[0][1];}
+    float getAccelY() {return ((long)data[0][2] << 8) + data[0][3];}
+    float getAccelZ() {return ((long)data[0][4] << 8) + data[0][5];}
+    float getGyroX() {return ((long)data[1][0] << 8) + data[1][1];}
+    float getGyroY() {return ((long)data[1][2] << 8) + data[1][3];}
+    float geti() {return ((long)data[1][4] << 8) + data[1][5];}
+    float getMagX() {return ((long)data[2][0] << 8) + data[2][1];}  
+    float getMagY() {return ((long)data[2][2] << 8) + data[2][3];}
+    float getMagZ() {return ((long)data[2][4] << 8) + data[2][5];}
+    
+    unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
+
+    
 
 };
 
@@ -387,7 +423,7 @@ struct GPS {
 
     void receive(unsigned long id, byte buf[]){
         if(id >= 0x10F23 && id <= 0x10F6){
-            byte digit2 = (id - 0x10F20); // 0 for 0x10F20, 1 for 0x10F21, 2 for 0x10F22, 3 for 0x10F23
+            byte digit2 = (id - 0x10F23); 
             receiveTime = millis();
             for(int i = 0; i < 8; i++) data[digit2][i] = buf[i];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
             return;
