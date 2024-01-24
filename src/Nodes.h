@@ -143,7 +143,7 @@ struct Inverter {
     void setMaxDCCurrent(float in) {send(0x22, (long)(in*10), 2);}//       ^
     void setMaxDCBrakeCurrent(float in) {send(0x23, (long)(in*10), 2);}//  ^
     void setDriveEnable(byte in) {send(0x24, (long)in, 1);} //Enable/disable motor
-    unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
+    unsigned long getAge() const {return(millis() - receiveTime);} //time since last data packet
 };
 
 
@@ -501,7 +501,7 @@ struct Pedals{
         send();
     }
 
-    unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
+    unsigned long getAge() const {return(millis() - receiveTime);} //time since last data packet
 
 };
 
