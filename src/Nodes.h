@@ -483,6 +483,9 @@ struct Pedals{
 
     unsigned long getID() {return ID;}
 
+    float getThrottle() const {
+        return 0; // TODO: Do
+    }
     float getAPPS1() const {return ((long)data[0][0] << 8) + data[0][1];}
     float getAPPS2() const {return ((long)data[0][2] << 8) + data[0][3];}
     float getBrakePressureF() const {return ((long)data[0][4] << 8) + data[0][5];}
