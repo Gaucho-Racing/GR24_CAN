@@ -99,38 +99,38 @@ struct Inverter {
     }
     unsigned long getID() {return ID;}
 
-    long getERPM() {return(((long)data[0][0] << 24) + ((long)data[0][1] << 16) + ((long)data[0][2] << 8) + data[0][3]);} //rpm/pole pairs
-    float getDuty() {return((((long)data[0][4] << 8) + data[0][5])/10);} //i think [0,100]. Related to top speed
-    int getVoltIn() {return(((long)data[0][6] << 8) + data[0][7]);}
-    float getACCurrent() {return((((long)data[1][0] << 8) + data[1][1])/10);}
-    float getDCCurrent() {return(((long)(data[1][2] << 8) + data[1][3])/10);}
-    float getInvTemp() {return((((long)data[2][0] << 8) + data[2][1])/10);} //Deg C
-    float getMotorTemp() {return((((long)data[2][2] << 8) + data[2][3])/10);} //Deg C
-    byte getFaults() {return data[2][4];}
-    float getCurrentD() {return((((long)data[3][0] << 24) + ((long)data[3][1] << 16) + ((long)data[3][2] << 8) + data[3][3])/100);}  //FOC current (don't need)
-    float getCurrentQ() {return((((long)data[3][4] << 24) + ((long)data[3][5] << 16) + ((long)data[3][6] << 8) + data[3][7])/100);}  //FOC current (don't need)
-    byte getThrottleIn() {return data[4][0];}  //Received throttle signal by the invertor
-    byte getBrakeIn() {return data[4][1];}  //Received brake signal by the invertor
-    bool getD1() {return ((data[4][2] & 0x80) == 0x80);}  //Digital input read
-    bool getD2() {return ((data[4][2] & 0x40) == 0x40);}  //Digital input read
-    bool getD3() {return ((data[4][2] & 0x20) == 0x20);}  //Digital input read
-    bool getD4() {return ((data[4][2] & 0x10) == 0x10);}  //Digital input read
-    bool getDO1() {return ((data[4][2] & 0x08) == 0x08);}  //Digital output write
-    bool getDO2() {return ((data[4][2] & 0x04) == 0x04);}  //Digital output write
-    bool getDO3() {return ((data[4][2] & 0x02) == 0x02);}  //Digital output write
-    bool getDO4() {return ((data[4][2] & 0x01) == 0x01);}  //Digital output write
-    bool getDriveEnable() {return ((data[4][3] & 0x01) == 0x01);} //These are setting that can be changed (prob don't need these)
-    bool getCapTempLim() {return ((data[4][4] & 0x80) == 0x80);}//         ^
-    bool getDCCurrentLim() {return ((data[4][4] & 0x40) == 0x40);}//       ^
-    bool getDriveEnableLim() {return ((data[4][4] & 0x20) == 0x20);}//     ^
-    bool getIgbtAccelTempLim() {return ((data[4][4] & 0x10) == 0x10);}//   ^
-    bool getIgbtTempLim() {return ((data[4][4] & 0x08) == 0x08);}//        ^
-    bool getVoltInLim() {return ((data[4][4] & 0x04) == 0x04);}//          ^
-    bool getMotorAccelTempLim() {return ((data[4][4] & 0x02) == 0x02);}//  ^
-    bool getMotorTempLim() {return ((data[4][4] & 0x01) == 0x01);}//       ^
-    bool getRPMMinLimit() {return ((data[4][5] & 0x80) == 0x80);}//        ^
-    bool getRPMMaxLimit() {return ((data[4][5] & 0x40) == 0x40);}//        ^
-    bool getPowerLimit() {return ((data[4][5] & 0x20) == 0x20);}//    
+    long getERPM() const {return(((long)data[0][0] << 24) + ((long)data[0][1] << 16) + ((long)data[0][2] << 8) + data[0][3]);} //rpm/pole pairs
+    float getDuty() const {return((((long)data[0][4] << 8) + data[0][5])/10);} //i think [0,100]. Related to top speed
+    int getVoltIn() const {return(((long)data[0][6] << 8) + data[0][7]);}
+    float getACCurrent() const {return((((long)data[1][0] << 8) + data[1][1])/10);}
+    float getDCCurrent() const {return(((long)(data[1][2] << 8) + data[1][3])/10);}
+    float getInvTemp() const {return((((long)data[2][0] << 8) + data[2][1])/10);} //Deg C
+    float getMotorTemp() const {return((((long)data[2][2] << 8) + data[2][3])/10);} //Deg C
+    byte getFaults() const {return data[2][4];}
+    float getCurrentD() const {return((((long)data[3][0] << 24) + ((long)data[3][1] << 16) + ((long)data[3][2] << 8) + data[3][3])/100);}  //FOC current (don't need)
+    float getCurrentQ() const {return((((long)data[3][4] << 24) + ((long)data[3][5] << 16) + ((long)data[3][6] << 8) + data[3][7])/100);}  //FOC current (don't need)
+    byte getThrottleIn() const {return data[4][0];}  //Received throttle signal by the invertor
+    byte getBrakeIn() const {return data[4][1];}  //Received brake signal by the invertor
+    bool getD1() const {return ((data[4][2] & 0x80) == 0x80);}  //Digital input read
+    bool getD2() const {return ((data[4][2] & 0x40) == 0x40);}  //Digital input read
+    bool getD3() const {return ((data[4][2] & 0x20) == 0x20);}  //Digital input read
+    bool getD4() const {return ((data[4][2] & 0x10) == 0x10);}  //Digital input read
+    bool getDO1() const {return ((data[4][2] & 0x08) == 0x08);}  //Digital output write
+    bool getDO2() const {return ((data[4][2] & 0x04) == 0x04);}  //Digital output write
+    bool getDO3() const {return ((data[4][2] & 0x02) == 0x02);}  //Digital output write
+    bool getDO4() const {return ((data[4][2] & 0x01) == 0x01);}  //Digital output write
+    bool getDriveEnable() const {return ((data[4][3] & 0x01) == 0x01);} //These are setting that can be changed (prob don't need these)
+    bool getCapTempLim() const {return ((data[4][4] & 0x80) == 0x80);}//         ^
+    bool getDCCurrentLim() const {return ((data[4][4] & 0x40) == 0x40);}//       ^
+    bool getDriveEnableLim() const {return ((data[4][4] & 0x20) == 0x20);}//     ^
+    bool getIgbtAccelTempLim() const {return ((data[4][4] & 0x10) == 0x10);}//   ^
+    bool getIgbtTempLim() const {return ((data[4][4] & 0x08) == 0x08);}//        ^
+    bool getVoltInLim() const {return ((data[4][4] & 0x04) == 0x04);}//          ^
+    bool getMotorAccelTempLim() const {return ((data[4][4] & 0x02) == 0x02);}//  ^
+    bool getMotorTempLim() const {return ((data[4][4] & 0x01) == 0x01);}//       ^
+    bool getRPMMinLimit() const {return ((data[4][5] & 0x80) == 0x80);}//        ^
+    bool getRPMMaxLimit() const {return ((data[4][5] & 0x40) == 0x40);}//        ^
+    bool getPowerLimit() const {return ((data[4][5] & 0x20) == 0x20);}//    
 
     void setCurrent(float in) {send(0x1A, (long)(in*10), 2);}//            ^
     void setBrakeCurrent(float in) {send(0x1B, (long)(in*10), 2);}//       ^
@@ -222,11 +222,11 @@ struct VDM{
             }
     }
     
-    unsigned long getID() {return ID;}
-    unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
+    unsigned long getID() const {return ID;}
+    unsigned long getAge() const {return(millis() - receiveTime);} //time since last data packet
 
-    byte pedalPingRequest() {return data[3][0];}
-    byte getVCU_STATE() {return data[4][0];}
+    byte pedalPingRequest() const {return data[3][0];}
+    byte getVCU_STATE() const {return data[4][0];}
 
 
 
@@ -270,7 +270,7 @@ struct Wheel {
     CAN_message_t msg;
     unsigned long receiveTime = 0;
     int id_range[2];
-    char* loc_cstr;
+    const char* loc_cstr;
     Wheel(unsigned long id, FlexCAN_T4<CAN_DATA_BUS, RX_SIZE_256, TX_SIZE_16> &can, HubSensorArray loc) : ID(id), location(loc){
         can = Can2; //set reference
         switch(location){
@@ -318,41 +318,45 @@ struct Wheel {
     unsigned long getID() {return ID;}
 
 
-    float getSuspensionTravel() {return data[0][0];}
-    float getWheelSpeed() {return((long)data[0][1] << 8) + data[0][2];}
-    float getTirePressure() {return data[0][3];}
-    float getIMUAccelX() {return ((long)data[1][0] << 8) + data[1][1];}
-    float getIMUAccelY() {return ((long)data[1][2] << 8) + data[1][3];}
-    float getIMUAccelZ() {return ((long)data[1][4] << 8) + data[1][5];}
-    float getIMUGyroX() {return ((long)data[2][0] << 8) + data[2][1];}
-    float getIMUGyroY() {return ((long)data[2][2] << 8) + data[2][3];}
-    float getIMUGyroZ() {return ((long)data[2][4] << 8) + data[2][5];}
-    byte getBraketemp1() {return data[3][0];}
-    byte getBraketemp2() {return data[3][1];}
-    byte getBraketemp3() {return data[3][2];}
-    byte getBraketemp4() {return data[3][3];}
-    byte getBraketemp5() {return data[3][4];}
-    byte getBraketemp6() {return data[3][5];}
-    byte getBraketemp7() {return data[3][6];}
-    byte getBraketemp8() {return data[3][7];}
-    byte getTireTemp1() {return data[4][0];}
-    byte getTireTemp2() {return data[4][1];}
-    byte getTireTemp3() {return data[4][2];}
-    byte getTireTemp4() {return data[4][3];}
-    byte getTireTemp5() {return data[4][4];}
-    byte getTireTemp6() {return data[4][5];}
-    byte getTireTemp7() {return data[4][6];}
-    byte getTireTemp8() {return data[4][7];}
-    float getAvgBrakeTemp() {return (getBraketemp1() + getBraketemp2() + getBraketemp3() + getBraketemp4() + getBraketemp5() + getBraketemp6() + getBraketemp7() + getBraketemp8())/8;}
-    float getAvgTireTemp() {return (getTireTemp1() + getTireTemp2() + getTireTemp3() + getTireTemp4() + getTireTemp5() + getTireTemp6() + getTireTemp7() + getTireTemp8())/8;}
-    unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
+    float getSuspensionTravel() const {return data[0][0];}
+    float getWheelSpeed() const {return((long)data[0][1] << 8) + data[0][2];}
+    float getTirePressure() const {return data[0][3];}
+    float getIMUAccelX() const {return ((long)data[1][0] << 8) + data[1][1];}
+    float getIMUAccelY() const {return ((long)data[1][2] << 8) + data[1][3];}
+    float getIMUAccelZ() const {return ((long)data[1][4] << 8) + data[1][5];}
+    float getIMUGyroX() const {return ((long)data[2][0] << 8) + data[2][1];}
+    float getIMUGyroY() const {return ((long)data[2][2] << 8) + data[2][3];}
+    float getIMUGyroZ() const {return ((long)data[2][4] << 8) + data[2][5];}
+    byte getBraketemp1() const {return data[3][0];}
+    byte getBraketemp2() const {return data[3][1];}
+    byte getBraketemp3() const {return data[3][2];}
+    byte getBraketemp4() const {return data[3][3];}
+    byte getBraketemp5() const {return data[3][4];}
+    byte getBraketemp6() const {return data[3][5];}
+    byte getBraketemp7() const {return data[3][6];}
+    byte getBraketemp8() const {return data[3][7];}
+    byte getTireTemp1() const {return data[4][0];}
+    byte getTireTemp2() const {return data[4][1];}
+    byte getTireTemp3() const {return data[4][2];}
+    byte getTireTemp4() const {return data[4][3];}
+    byte getTireTemp5() const {return data[4][4];}
+    byte getTireTemp6() const {return data[4][5];}
+    byte getTireTemp7() const {return data[4][6];}
+    byte getTireTemp8() const {return data[4][7];}
+    float getAvgBrakeTemp() const {return (getBraketemp1() + getBraketemp2() + getBraketemp3() + getBraketemp4() + getBraketemp5() + getBraketemp6() + getBraketemp7() + getBraketemp8())/8;}
+    float getAvgTireTemp() const {return (getTireTemp1() + getTireTemp2() + getTireTemp3() + getTireTemp4() + getTireTemp5() + getTireTemp6() + getTireTemp7() + getTireTemp8())/8;}
+    unsigned long getAge() const {return(millis() - receiveTime);} //time since last data packet
     
 };
 
 
 
+/*
 
-//IMU // IMU
+ _____ _______ _     _
+   |   |  |  | |     |
+ __|__ |  |  | |_____|
+*/
 
 struct Central_IMU {
     byte data[3][8] = {{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  //Accel
@@ -381,17 +385,17 @@ struct Central_IMU {
         }
     }
 
-    float getAccelX() {return ((long)data[0][0] << 8) + data[0][1];}
-    float getAccelY() {return ((long)data[0][2] << 8) + data[0][3];}
-    float getAccelZ() {return ((long)data[0][4] << 8) + data[0][5];}
-    float getGyroX() {return ((long)data[1][0] << 8) + data[1][1];}
-    float getGyroY() {return ((long)data[1][2] << 8) + data[1][3];}
-    float geti() {return ((long)data[1][4] << 8) + data[1][5];}
-    float getMagX() {return ((long)data[2][0] << 8) + data[2][1];}  
-    float getMagY() {return ((long)data[2][2] << 8) + data[2][3];}
-    float getMagZ() {return ((long)data[2][4] << 8) + data[2][5];}
+    float getAccelX() const {return ((long)data[0][0] << 8) + data[0][1];}
+    float getAccelY() const {return ((long)data[0][2] << 8) + data[0][3];}
+    float getAccelZ() const {return ((long)data[0][4] << 8) + data[0][5];}
+    float getGyroX() const {return ((long)data[1][0] << 8) + data[1][1];}
+    float getGyroY() const {return ((long)data[1][2] << 8) + data[1][3];}
+    float geti() const {return ((long)data[1][4] << 8) + data[1][5];}
+    float getMagX() const {return ((long)data[2][0] << 8) + data[2][1];}  
+    float getMagY() const {return ((long)data[2][2] << 8) + data[2][3];}
+    float getMagZ() const {return ((long)data[2][4] << 8) + data[2][5];}
     
-    unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
+    unsigned long getAge() const {return(millis() - receiveTime);} //time since last data packet
 
     
 
@@ -434,11 +438,11 @@ struct GPS {
         }
     }
 
-    float getLatitude() {return ((long)data[0][0] << 24) + ((long)data[0][1] << 16) + ((long)data[0][2] << 8) + data[0][3];}
-    float getHighPrecisionLatitude() {return ((long)data[0][4] << 24) + ((long)data[0][5] << 16) + ((long)data[0][6] << 8) + data[0][7];}
-    float getLongitude() {return ((long)data[1][0] << 24) + ((long)data[1][1] << 16) + ((long)data[1][2] << 8) + data[1][3];}
-    float getHighPrecisionLongitude() {return ((long)data[1][4] << 24) + ((long)data[1][5] << 16) + ((long)data[1][6] << 8) + data[1][7];}
-    unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
+    float getLatitude() const {return ((long)data[0][0] << 24) + ((long)data[0][1] << 16) + ((long)data[0][2] << 8) + data[0][3];}
+    float getHighPrecisionLatitude() const {return ((long)data[0][4] << 24) + ((long)data[0][5] << 16) + ((long)data[0][6] << 8) + data[0][7];}
+    float getLongitude() const {return ((long)data[1][0] << 24) + ((long)data[1][1] << 16) + ((long)data[1][2] << 8) + data[1][3];}
+    float getHighPrecisionLongitude() const {return ((long)data[1][4] << 24) + ((long)data[1][5] << 16) + ((long)data[1][6] << 8) + data[1][7];}
+    unsigned long getAge() const {return(millis() - receiveTime);} //time since last data packet
 
     //rest of the data is still undecided.
 
@@ -479,11 +483,11 @@ struct Pedals{
 
     unsigned long getID() {return ID;}
 
-    float getAPPS1() {return ((long)data[0][0] << 8) + data[0][1];}
-    float getAPPS2() {return ((long)data[0][2] << 8) + data[0][3];}
-    float getBrakePressureF() {return ((long)data[0][4] << 8) + data[0][5];}
-    float getBrakePressureR() {return ((long)data[0][6] << 8) + data[0][7];}
-    byte getPedalsPingResponse() {return data[1][0];}
+    float getAPPS1() const {return ((long)data[0][0] << 8) + data[0][1];}
+    float getAPPS2() const {return ((long)data[0][2] << 8) + data[0][3];}
+    float getBrakePressureF() const {return ((long)data[0][4] << 8) + data[0][5];}
+    float getBrakePressureR() const {return ((long)data[0][6] << 8) + data[0][7];}
+    byte getPedalsPingResponse() const {return data[1][0];}
     void pedalPingRequest(byte anything) {dataOut[0] = anything; send();} //ping request
     
     void send(){
@@ -548,13 +552,13 @@ struct ACU {
 
 
     //voltages and temps for specific cells (range 0 to 144)
-    float getCellVoltage_n(int cell_n){
+    float getCellVoltage_n(int cell_n) const {
         if(cell_n < 0 || cell_n > 144) Serial.println("Battery Cell number out of range [0,144]");
         int col = (cell_n%4)*2; //even bytes
         int row = (cell_n/4) + 3; //check GR24 CAN datasheet
         return data[row][col];
     }
-    float getCellTemp_n(int cell_n){
+    float getCellTemp_n(int cell_n) const {
         if(cell_n < 0 || cell_n > 144) Serial.println("Battery Cell number out of range [0,144]");
         int col = (cell_n%4)*2 + 1; //odd bytes
         int row = (cell_n/4) + 3; //check GR24 CAN datasheet
@@ -562,21 +566,21 @@ struct ACU {
     }
 
     //ACU General
-    float getAccumulatorVoltage(){return ((long)data[0][0] << 8) + data[0][1];}
-    float getAccumulatorCurrent(){return ((long)data[0][2] << 8) + data[0][3];}
-    float getMaxCellTemp(){return ((long)data[0][4] << 8) + data[0][5];}
-    byte getSOC(){return data[0][6];}//state of charge
-    byte getACUGeneralErrors(){return data[0][7];}
+    float getAccumulatorVoltage() const {return ((long)data[0][0] << 8) + data[0][1];}
+    float getAccumulatorCurrent() const {return ((long)data[0][2] << 8) + data[0][3];}
+    float getMaxCellTemp() const {return ((long)data[0][4] << 8) + data[0][5];}
+    byte getSOC() const {return data[0][6];}//state of charge
+    byte getACUGeneralErrors() const {return data[0][7];}
 
-    byte getFan1Speed(){return data[1][0];}
-    byte getFan2Speed(){return data[1][1];}
-    byte getFan3Speed(){return data[1][2];}
-    byte getFan4Speed(){return data[1][3];}
-    byte getPumpSpeed(){return data[1][4];}
-    float getWaterTemp(){return ((long)data[1][5] << 8) + data[1][6];}
-    byte getPowertrainCoolingErrors(){return data[1][7];}
-    byte getACUPingResponse(){return data[39][0];}
-    unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
+    byte getFan1Speed() const {return data[1][0];}
+    byte getFan2Speed() const {return data[1][1];}
+    byte getFan3Speed() const {return data[1][2];}
+    byte getFan4Speed() const {return data[1][3];}
+    byte getPumpSpeed() const {return data[1][4];}
+    float getWaterTemp() const {return ((long)data[1][5] << 8) + data[1][6];}
+    byte getPowertrainCoolingErrors() const {return data[1][7];}
+    byte getACUPingResponse() const {return data[39][0];}
+    unsigned long getAge() const {return(millis() - receiveTime);} //time since last data packet
 
 
     void setFan1Speed(byte in) {dataOut[0] = in; send();}
@@ -639,8 +643,8 @@ struct BCM {
         }
     }
 
-    byte getCloudStatus() {return data[0];}
-    unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
+    byte getCloudStatus() const {return data[0];}
+    unsigned long getAge() const {return(millis() - receiveTime);} //time since last data packet
 
 };
 
@@ -678,14 +682,14 @@ struct Dash {
         }
     }
 
-    float getAccelX() {return ((long)data[0][0] << 8) + data[0][1];}
-    float getAccelY() {return ((long)data[0][2] << 8) + data[0][3];}
-    float getAccelZ() {return ((long)data[0][4] << 8) + data[0][5];}
-    float getGyroX() {return ((long)data[1][0] << 8) + data[1][1];}
-    float getGyroY() {return ((long)data[1][2] << 8) + data[1][3];}
-    float getGyroZ() {return ((long)data[1][4] << 8) + data[1][5];}
+    float getAccelX() const {return ((long)data[0][0] << 8) + data[0][1];}
+    float getAccelY() const {return ((long)data[0][2] << 8) + data[0][3];}
+    float getAccelZ() const {return ((long)data[0][4] << 8) + data[0][5];}
+    float getGyroX() const {return ((long)data[1][0] << 8) + data[1][1];}
+    float getGyroY() const {return ((long)data[1][2] << 8) + data[1][3];}
+    float getGyroZ() const {return ((long)data[1][4] << 8) + data[1][5];}
 
-    unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
+    unsigned long getAge() const {return(millis() - receiveTime);} //time since last data packet
 
     void send(){
         for(int i = 0; i < 8; i++) msg.buf[i] = dataOut[i];
@@ -736,13 +740,17 @@ struct Energy_Meter {
         }
     }
 
-    float getCurrent() {return ((long)data[0] << 24) + ((long)data[1] << 16) + ((long)data[2] << 8) + data[3];}
-    float getVoltage() {return ((long)data[4] << 24) + ((long)data[5] << 16) + ((long)data[6] << 8) + data[7];}
-    unsigned long getAge(){return(millis() - receiveTime);} //time since last data packet
+    float getCurrent() const {return ((long)data[0] << 24) + ((long)data[1] << 16) + ((long)data[2] << 8) + data[3];}
+    float getVoltage() const {return ((long)data[4] << 24) + ((long)data[5] << 16) + ((long)data[6] << 8) + data[7];}
+    unsigned long getAge() const {return(millis() - receiveTime);} //time since last data packet
     
 };
+
+
+
+
+// DASH PANEL
+
+
+
 #endif
-
-
-
-

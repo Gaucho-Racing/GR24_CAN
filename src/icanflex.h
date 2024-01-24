@@ -67,16 +67,6 @@ class iCANflex{
 
     void ping(byte);
 
-
-
-
-
-
-
-
-
-
-
 };
 
 

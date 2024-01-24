@@ -78,8 +78,6 @@ void iCANflex::rawData(INT32U *id, INT8U *buffer){*id=msg.id; buffer=msg.buf;}  
 
 
 
-
-
 void iCANflex::send(long OutId, long data, int dataLength){    //Sends 8 bytes with that Id and that data shifted left all the way
     byte stuff[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
     for(int i=0; i<dataLength; i++)
