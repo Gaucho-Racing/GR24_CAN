@@ -543,7 +543,6 @@ struct ACU {
         else if(id == 0xC7) {
             receiveTime = millis();
             for(int i = 0; i < 8; i++) data[39][i] = buf[i];
-            return;
         }
         else{
             Serial.print(id, HEX);
@@ -572,21 +571,37 @@ struct ACU {
     float getAccumulatorVoltage() const {return 0.01 * (((uint16_t)data[4][0] << 8) + data[4][1]);}
     float getAccumulatorCurrent() const {return 0.01 * (((uint16_t)data[4][2] << 8) + data[4][3]) - 327.67;}
     float getMaxCellTemp() const {return ((long)data[4][4] << 8) + data[4][5];}
-    byte getSOC() const {return data[5][7];} //state of charge
     byte getACUGeneralErrors() const {return data[5][6];}
 
+    // ACU General 2
+    float getTSVoltage() const {return 0.01 * (((uint16_t)data[5][0] << 8) + data[5][1]);}
+    byte getStates() const {return data[5][2];}
+    float getMaxBalResistorTemp() const {return (((uint16_t)data[5][3] << 8) + data[5][4]);} // DOUBLE CHECK THIS
+    byte getSDCVoltage() const {return 0.01 * ((uint16_t)data[5][5]);}
+    byte getGLVVoltage() const {return 0.01 * ((uint16_t)data[5][6]);}
+    byte getSOC() const {return data[5][7];} //state of charge
+
+    // Powertrain Cooling
     byte getFan1Speed() const {return data[6][0];}
     byte getFan2Speed() const {return data[6][1];}
     byte getFan3Speed() const {return data[6][2];}
-    // byte getFan4Speed() const {return data[6][3];} --> Not on spreadsheet?
     byte getPumpSpeed() const {return data[6][3];}
     byte getACUTemp() const {return data[6][4];}
     float getWaterTemp() const {return ((long)data[6][5] << 8) + data[6][6];}
     byte getPowertrainCoolingErrors() const {return data[1][7];}
-    byte getACUPingResponse() const {return data[39][0];}
+
+    // Expanded Cell Data
+    byte getECDCellNumber() const{return data[7][0];}
+    float getECDCellVoltage() const {return (((uint16_t)data[7][1] << 8) + data[7][2]);} 
+    float getOpenCellVoltage() const {return (((uint16_t)data[7][3] << 8) + data[7][4]);} 
+    float getECDCellTemp() const {return (((uint16_t)data[7][5] << 8) + data[7][6]);} 
+    byte getECDErrors() const{return data[7][7];}
+
+    // ACU Ping Response
+    byte getACUPingResponse() const {return data[44][0];}
     unsigned long getAge() const {return(millis() - receiveTime);} //time since last data packet
 
-
+    // Set Fan Speed
     void setFan1Speed(byte in) {dataOut[0] = in; send();}
     void setFan2Speed(byte in) {dataOut[1] = in; send();}
     void setFan3Speed(byte in) {dataOut[2] = in; send();}
