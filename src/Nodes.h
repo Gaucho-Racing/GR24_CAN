@@ -524,10 +524,10 @@ struct ACU {
     //condensed cell data and bunch of other stuff
     byte data[40][8] = {0x00}; //40 ids
     byte dataOut[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    unsigned long ID = 0;
+    uint32_t ID = 0;
     FlexCAN_T4<CAN_PRIMARY_BUS, RX_SIZE_256, TX_SIZE_16> Can1;
     CAN_message_t msg;
-    unsigned long receiveTime = 0;
+    uint32_t receiveTime = 0;
     int range_cell_data[2] = {0x99, 0xBC};
     
     ACU(unsigned long id, FlexCAN_T4<CAN_PRIMARY_BUS, RX_SIZE_256, TX_SIZE_16> &can): ID(id){
@@ -535,8 +535,8 @@ struct ACU {
     }
 
     void receive(unsigned long id, byte buf[]){
-        if(id >= 0x96 && id <= 0xBC){
-            int row = id - 0x96;
+        if(id >= 0x96 && id <= 0xC4){
+            uint32_t row = id - 0x96;
             receiveTime = millis();
             for(int i = 0; i < 8; i++) data[row][i] = buf[i];
         }
@@ -547,7 +547,7 @@ struct ACU {
         }
         else{
             Serial.print(id, HEX);
-            Serial.println(" is not data from Battery");
+            Serial.println(" is not data from ACU");
         }
     }
 
