@@ -524,10 +524,10 @@ struct ACU {
     //condensed cell data and bunch of other stuff
     byte data[40][8] = {0x00}; //40 ids
     byte dataOut[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    unsigned long ID = 0;
+    uint32_t ID = 0;
     FlexCAN_T4<CAN_PRIMARY_BUS, RX_SIZE_256, TX_SIZE_16> Can1;
     CAN_message_t msg;
-    unsigned long receiveTime = 0;
+    uint32_t receiveTime = 0;
     int range_cell_data[2] = {0x99, 0xBC};
     
     ACU(unsigned long id, FlexCAN_T4<CAN_PRIMARY_BUS, RX_SIZE_256, TX_SIZE_16> &can): ID(id){
@@ -535,57 +535,73 @@ struct ACU {
     }
 
     void receive(unsigned long id, byte buf[]){
-        if(id >= 0x96 && id <= 0xBC){
-            int row = id - 0x96;
+        if(id >= 0x96 && id <= 0xC4){
+            uint32_t row = id - 0x96;
             receiveTime = millis();
-            for(int i = 0; i < 8; i++) data[row][i] = buf[i];
+            for(size_t i = 0; i < 8; i++) data[row][i] = buf[i];
         }
         else if(id == 0xC7) {
             receiveTime = millis();
             for(int i = 0; i < 8; i++) data[39][i] = buf[i];
-            return;
         }
         else{
             Serial.print(id, HEX);
-            Serial.println(" is not data from Battery");
+            Serial.println(" is not data from ACU");
         }
     }
 
     unsigned long getID() {return ID;}
 
 
-    //voltages and temps for specific cells (range 0 to 144)
-    float getCellVoltage_n(int cell_n) const {
-        if(cell_n < 0 || cell_n > 144) Serial.println("Battery Cell number out of range [0,144]");
-        int col = (cell_n%4)*2; //even bytes
-        int row = (cell_n/4) + 3; //check GR24 CAN datasheet
-        return data[row][col];
+    //voltages and temps for specific cells (range 0 to 127)
+    float getCellVoltage_n(size_t cell_n) const {
+        if(cell_n < 0 || cell_n > 127) Serial.println("Battery Cell number out of range [0,127]");
+        size_t col = cell_n % 8;
+        size_t row = cell_n / 8 + 8;
+        return 2.0 + (0.01 * data[row][col]);
     }
     float getCellTemp_n(int cell_n) const {
-        if(cell_n < 0 || cell_n > 144) Serial.println("Battery Cell number out of range [0,144]");
-        int col = (cell_n%4)*2 + 1; //odd bytes
-        int row = (cell_n/4) + 3; //check GR24 CAN datasheet
-        return data[row][col];
+        if(cell_n < 0 || cell_n > 127) Serial.println("Battery Cell number out of range [0,127]");
+        size_t col = cell_n % 8;
+        size_t row = cell_n / 8 + 24;
+        return 0.5 * data[row][col];
     }
 
     //ACU General
-    float getAccumulatorVoltage() const {return ((long)data[0][0] << 8) + data[0][1];}
-    float getAccumulatorCurrent() const {return ((long)data[0][2] << 8) + data[0][3];}
-    float getMaxCellTemp() const {return ((long)data[0][4] << 8) + data[0][5];}
-    byte getSOC() const {return data[0][6];}//state of charge
-    byte getACUGeneralErrors() const {return data[0][7];}
+    float getAccumulatorVoltage() const {return 0.01 * (((uint16_t)data[4][0] << 8) + data[4][1]);}
+    float getAccumulatorCurrent() const {return 0.01 * (((uint16_t)data[4][2] << 8) + data[4][3]) - 327.67;}
+    float getMaxCellTemp() const {return ((long)data[4][4] << 8) + data[4][5];}
+    byte getACUGeneralErrors() const {return data[5][6];}
 
-    byte getFan1Speed() const {return data[1][0];}
-    byte getFan2Speed() const {return data[1][1];}
-    byte getFan3Speed() const {return data[1][2];}
-    byte getFan4Speed() const {return data[1][3];}
-    byte getPumpSpeed() const {return data[1][4];}
-    float getWaterTemp() const {return ((long)data[1][5] << 8) + data[1][6];}
+    // ACU General 2
+    float getTSVoltage() const {return 0.01 * (((uint16_t)data[5][0] << 8) + data[5][1]);}
+    byte getStates() const {return data[5][2];}
+    float getMaxBalResistorTemp() const {return (((uint16_t)data[5][3] << 8) + data[5][4]);} // DOUBLE CHECK THIS
+    byte getSDCVoltage() const {return 0.01 * ((uint16_t)data[5][5]);}
+    byte getGLVVoltage() const {return 0.01 * ((uint16_t)data[5][6]);}
+    byte getSOC() const {return data[5][7];} //state of charge
+
+    // Powertrain Cooling
+    byte getFan1Speed() const {return data[6][0];}
+    byte getFan2Speed() const {return data[6][1];}
+    byte getFan3Speed() const {return data[6][2];}
+    byte getPumpSpeed() const {return data[6][3];}
+    byte getACUTemp() const {return data[6][4];}
+    float getWaterTemp() const {return ((long)data[6][5] << 8) + data[6][6];}
     byte getPowertrainCoolingErrors() const {return data[1][7];}
-    byte getACUPingResponse() const {return data[39][0];}
+
+    // Expanded Cell Data
+    byte getECDCellNumber() const{return data[7][0];}
+    float getECDCellVoltage() const {return (((uint16_t)data[7][1] << 8) + data[7][2]);} 
+    float getOpenCellVoltage() const {return (((uint16_t)data[7][3] << 8) + data[7][4]);} 
+    float getECDCellTemp() const {return (((uint16_t)data[7][5] << 8) + data[7][6]);} 
+    byte getECDErrors() const{return data[7][7];}
+
+    // ACU Ping Response
+    byte getACUPingResponse() const {return data[44][0];}
     unsigned long getAge() const {return(millis() - receiveTime);} //time since last data packet
 
-
+    // Set Fan Speed
     void setFan1Speed(byte in) {dataOut[0] = in; send();}
     void setFan2Speed(byte in) {dataOut[1] = in; send();}
     void setFan3Speed(byte in) {dataOut[2] = in; send();}
